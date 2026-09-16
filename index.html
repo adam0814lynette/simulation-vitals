@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulated Patient Monitor</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="setupView" class="view setup-view">
+    <section class="setup-card">
+      <div class="eyebrow">SIMULATION CONTROL</div>
+      <h1>Patient Monitor Setup</h1>
+      <p class="intro">Configure numbered stages for your simulation. Notes and stage details stay on this screen.</p>
+      <div class="setup-toolbar">
+        <label for="presetCount">Number of states</label>
+        <select id="presetCount" aria-label="Number of states">
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          <option value="4">4</option><option value="5" selected>5</option><option value="6">6</option>
+          <option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+        </select>
+      </div>
+      <div id="presetEditor" class="preset-editor"></div>
+      <div class="setup-actions">
+        <button id="startButton" class="button primary">Start simulation</button>
+        <button id="clearButton" class="button danger">Clear all presets</button>
+      </div>
+      <p id="saveStatus" class="save-status" role="status"></p>
+    </section>
+  </main>
+
+  <main id="monitorView" class="view monitor-view hidden">
+    <header class="monitor-header">
+      <div><span class="monitor-brand">SIM MONITOR</span><span class="monitor-subtitle">SIMULATION ONLY</span></div>
+      <div id="clock" class="clock">00:00</div>
+    </header>
+    <section class="vitals-grid">
+      <article class="vital-card hr-card"><div class="vital-label">ECG <span>HR</span></div><div class="vital-value"><span id="hrValue">--</span><small>bpm</small></div></article>
+      <article class="trace-card"><canvas id="ecgCanvas" aria-label="ECG waveform"></canvas></article>
+      <article class="vital-card spo2-card"><div class="vital-label">SpO₂</div><div class="vital-value"><span id="spo2Value">--</span><small>%</small></div><div class="vital-caption">PLETH</div></article>
+      <article class="trace-card"><canvas id="plethCanvas" aria-label="Pulse oximetry waveform"></canvas></article>
+      <article class="vital-card bp-card"><div class="vital-label">NIBP</div><div class="bp-value"><span id="sbpValue">---</span>/<span id="dbpValue">---</span></div><div class="map-value">MAP <span id="mapValue">---</span></div></article>
+      <article class="vital-card co2-card"><div class="vital-label">RESPIRATORY RATE</div><div class="vital-value rr-primary"><span id="rrValue">--</span><small>/min</small></div><div class="etco2-secondary">ETCO₂ <span id="etco2Value">--</span> kPa</div></article>
+    </section>
+    <footer class="monitor-controls">
+      <div id="presetButtons" class="preset-buttons" aria-label="Simulation states"></div>
+      <div class="control-buttons">
+        <button id="muteButton" class="monitor-button" title="Toggle heartbeat audio — press M"><span id="muteIcon" aria-hidden="true">🔇</span> Unmute</button>
+        <button id="pauseButton" class="monitor-button" title="Pause or resume simulation — press Space">Pause</button>
+        <button id="resetButton" class="monitor-button reset" title="Return to setup — press R">Reset</button>
+      </div>
+    </footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
