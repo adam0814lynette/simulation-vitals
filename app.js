@@ -67,7 +67,17 @@
   function isNoPulseRhythm(rhythm) { return rhythm==='Ventricular fibrillation' || rhythm==='Asystole'; }
   function rhythmEcgAt(t, phase, rhythm) { if(rhythm==='Atrial fibrillation')return afibTrace(t); if(rhythm==='Atrial flutter')return flutterEcg(phase,t); if(rhythm==='PVCs')return Math.floor(t/Math.max(.01,60/Math.max(20,state.hr)))%3===2?pvcEcg(phase):sinusEcg(phase); if(rhythm==='Monomorphic ventricular tachycardia')return vtEcg(phase); if(rhythm==='Ventricular fibrillation')return vfEcg(t); if(rhythm==='Asystole')return asystoleEcg(t); return sinusEcg(phase); }
   function pulseShape(phase, arterial=false) { if (phase < .10) return phase / .10; if (phase < .22) return 1 - (phase-.10)/.12*.18; if (phase < .62) return .82 - (phase-.22)/.40*.47; if (phase < .72) return .35 - (phase-.62)/.10*.10; return 0; }
-  function plethShape(phase) { if (phase<0 || phase>=1) return 0; if (phase<.10) { const x=phase/.10; return x*x*(3-2*x); } if (phase<.62) return .95*Math.exp(-(phase-.10)*3.5); if (phase<.72) return .20 + .07*Math.exp(-Math.pow((phase-.66)/.025,2)); return .20*Math.exp(-(phase-.72)*4.5); }
+  function smoothstep(x) { return x*x*(3-2*x); }
+  function plethShape(phase) {
+    if (phase<0 || phase>=1) return 0;
+    if (phase<.085) return smoothstep(phase/.085);
+    const elapsed=phase-.085;
+    const primary=.98*Math.exp(-elapsed*3.35);
+    const notch=.15*Math.exp(-Math.pow((phase-.31)/.032,2));
+    const shoulder=.105*Math.exp(-Math.pow((phase-.37)/.055,2));
+    const taper=phase>.78 ? 1-smoothstep((phase-.78)/.22) : 1;
+    return Math.max(0,(primary-notch+shoulder)*taper);
+  }
   function peripheralPlethAt(t,rhythm) { if(isNoPulseRhythm(rhythm))return 0; const pulseDelay=.16, pulseTime=t-pulseDelay, basePeriod=60/Math.max(20,state.hr), phase=rhythm==='Atrial fibrillation'?afibPulsePhase(pulseTime):phaseAt(pulseTime,basePeriod); let amplitude=.72; if(rhythm==='PVCs'&&Math.floor(pulseTime/Math.max(.01,basePeriod))%3===2)amplitude=.32; if(rhythm==='Monomorphic ventricular tachycardia')amplitude=.48; return plethShape(phase)*amplitude; }
   function sampleWaves(t) { const rhythm=presets[activePreset]?.rhythm||rhythmOptions[0], basePeriod=60/Math.max(20,state.hr), p=phaseAt(t,basePeriod), ecg=rhythmEcgAt(t,p,rhythm), pulse=peripheralPlethAt(t,rhythm); const rp=phaseAt(t,60/Math.max(4,state.rr)); return {ecg,pleth:pulse,arterial:pulse,capno:rp<.12?rp/.12*.82:rp<.58?.82:rp<.7?.82*(1-(rp-.58)/.12):0}; }
   function addWaveSamples() { const interval=1/120; while(sampleClock<=simTime){ waveHistory.push({t:sampleClock,...sampleWaves(sampleClock)}); sampleClock+=interval; } const cutoff=simTime-16; while(waveHistory.length && waveHistory[0].t<cutoff) waveHistory.shift(); }
@@ -80,5 +90,16 @@
   function wakeControls(){const controls=$('monitorView').querySelector('.monitor-controls');controls.classList.remove('idle');clearTimeout(idleTimer);idleTimer=setTimeout(()=>controls.classList.add('idle'),5000);}
   function toggleMute(){muted=!muted;$('muteButton').innerHTML=`<span id="muteIcon" aria-hidden="true">${muted?'🔇':'🔊'}</span> ${muted?'Unmute':'Mute'}`;if(!muted)beep();wakeControls();}
   function togglePause(){paused=!paused;$('pauseButton').textContent=paused?'Resume':'Pause';wakeControls();}
-  $('presetCount').onchange=()=>{readEditor();makeEditor();}; $('startButton').onclick=showMonitor; $('clearButton').onclick=()=>{localStorage.removeItem(STORAGE_KEY);presets=Array.from({length:+$('presetCount').value},blankPreset);makeEditor();$('saveStatus').textContent='Presets cleared. Enter new values to start over.';}; $('presetButtons').onclick=e=>{const b=e.target.closest('[data-preset]');if(b){selectPreset(+b.dataset.preset);wakeControls();}}; $('muteButton').onclick=toggleMute; $('pauseButton').onclick=togglePause; $('resetButton').onclick=()=>{cancelAnimationFrame(raf);raf=0;paused=false;clearTimeout(idleTimer);releaseScreenWakeLock();$('monitorView').classList.add('hidden');$('setupView').classList.remove('hidden');makeEditor();}; $('monitorView').addEventListener('pointermove',wakeControls); $('monitorView').addEventListener('keydown',wakeControls); document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('monitorView').classList.contains('hidden'))requestScreenWakeLock();}); window.addEventListener('keydown',e=>{if($('monitorView').classList.contains('hidden')||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return; if(/^[1-9]$/.test(e.key)){const i=+e.key-1;if(presets[i])selectPreset(i);}else if(e.key==='0'&&presets[9])selectPreset(9);else if(e.key.toLowerCase()==='m')toggleMute();else if(e.code==='Space'){e.preventDefault();togglePause();}else if(e.key.toLowerCase()==='r')$('resetButton').click();wakeControls();}); window.addEventListener('resize',resizeAll); makeEditor();
+  $('presetCount').onchange=()=>{readEditor();makeEditor();};
+  $('presetEditor').addEventListener('input',readEditor);
+  $('presetEditor').addEventListener('change',readEditor);
+  $('startButton').onclick=showMonitor;
+  $('clearButton').onclick=()=>{presets=Array.from({length:+$('presetCount').value},blankPreset);makeEditor();save();$('saveStatus').textContent='Presets cleared. Enter new values to start over.';};
+  $('presetButtons').onclick=e=>{const b=e.target.closest('[data-preset]');if(b){selectPreset(+b.dataset.preset);wakeControls();}};
+  $('muteButton').onclick=toggleMute; $('pauseButton').onclick=togglePause;
+  $('resetButton').onclick=()=>{cancelAnimationFrame(raf);raf=0;paused=false;clearTimeout(idleTimer);releaseScreenWakeLock();$('monitorView').classList.add('hidden');$('setupView').classList.remove('hidden');makeEditor();};
+  $('monitorView').addEventListener('pointermove',wakeControls); $('monitorView').addEventListener('keydown',wakeControls);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!$('monitorView').classList.contains('hidden'))requestScreenWakeLock();});
+  window.addEventListener('keydown',e=>{if($('monitorView').classList.contains('hidden')||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return; if(/^[1-9]$/.test(e.key)){const i=+e.key-1;if(presets[i])selectPreset(i);}else if(e.key==='0'&&presets[9])selectPreset(9);else if(e.key.toLowerCase()==='m')toggleMute();else if(e.code==='Space'){e.preventDefault();togglePause();}else if(e.key.toLowerCase()==='r')$('resetButton').click();wakeControls();});
+  window.addEventListener('resize',resizeAll); makeEditor();
 })();

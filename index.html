@@ -20,7 +20,7 @@
           <option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
         </select>
       </div>
-      <div id="presetEditor" class="preset-editor"></div>
+      <div id="presetEditor" class="preset-editor" aria-label="Simulation state editor"></div>
       <div class="setup-actions">
         <button id="startButton" class="button primary">Start simulation</button>
         <button id="clearButton" class="button danger">Clear all presets</button>
@@ -34,7 +34,7 @@
       <div><span class="monitor-brand">SIM MONITOR</span><span class="monitor-subtitle">SIMULATION ONLY</span></div>
       <div id="clock" class="clock">00:00</div>
     </header>
-    <section class="vitals-grid">
+    <section class="vitals-grid" aria-label="Patient vital signs">
       <article class="vital-card hr-card"><div class="vital-label">ECG <span>HR</span></div><div class="vital-value"><span id="hrValue">--</span><small>bpm</small></div></article>
       <article class="trace-card"><canvas id="ecgCanvas" aria-label="ECG waveform"></canvas></article>
       <article class="vital-card spo2-card"><div class="vital-label">SpO₂</div><div class="vital-value"><span id="spo2Value">--</span><small>%</small></div><div class="vital-caption">PLETH</div></article>
