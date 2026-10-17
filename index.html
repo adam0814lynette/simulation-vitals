@@ -30,8 +30,13 @@
   </main>
 
   <main id="monitorView" class="view monitor-view hidden">
+    <div class="orientation-warning" role="dialog" aria-modal="true" aria-labelledby="orientationTitle">
+      <div class="orientation-icon" aria-hidden="true">↻</div>
+      <h2 id="orientationTitle">Rotate device</h2>
+      <p>Please turn your device sideways to view the simulation monitor.</p>
+    </div>
     <header class="monitor-header">
-      <div><span class="monitor-brand">SIM MONITOR</span><span class="monitor-subtitle">SIMULATION ONLY</span></div>
+      <div><span class="monitor-brand">SIM MONITOR</span><span class="monitor-version">v1.0.3</span><span class="monitor-subtitle">SIMULATION ONLY</span></div>
       <div id="clock" class="clock">00:00</div>
     </header>
     <section class="vitals-grid" aria-label="Patient vital signs">
