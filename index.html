@@ -9,7 +9,7 @@
 <body>
   <main id="setupView" class="view setup-view">
     <section class="setup-card">
-      <div class="eyebrow">SIMULATION CONTROL</div>
+      <div class="eyebrow"><span>SIMULATION CONTROL</span><span id="setupVersion" class="setup-version"></span></div>
       <h1>Patient Monitor Setup</h1>
       <p class="intro">Configure numbered stages for your simulation. Notes and stage details stay on this screen.</p>
       <div class="setup-toolbar">
@@ -18,6 +18,11 @@
           <option value="1">1</option><option value="2">2</option><option value="3">3</option>
           <option value="4">4</option><option value="5" selected>5</option><option value="6">6</option>
           <option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+        </select>
+        <label for="tempUnit">Temperature</label>
+        <select id="tempUnit" aria-label="Temperature unit">
+          <option value="C" selected>°C</option>
+          <option value="F">°F</option>
         </select>
       </div>
       <div id="presetEditor" class="preset-editor" aria-label="Simulation state editor"></div>
@@ -36,7 +41,7 @@
       <p>Please turn your device sideways to view the simulation monitor.</p>
     </div>
     <header class="monitor-header">
-      <div><span class="monitor-brand">SIM MONITOR</span><span class="monitor-version">v1.0.3</span><span class="monitor-subtitle">SIMULATION ONLY</span></div>
+      <div><span class="monitor-brand">SIM MONITOR</span><span id="monitorVersion" class="monitor-version"></span><span class="monitor-subtitle">SIMULATION ONLY</span></div>
       <div id="clock" class="clock">00:00</div>
     </header>
     <section class="vitals-grid" aria-label="Patient vital signs">
@@ -45,7 +50,7 @@
       <article class="vital-card spo2-card"><div class="vital-label">SpO₂</div><div class="vital-value"><span id="spo2Value">--</span><small>%</small></div><div class="vital-caption">PLETH</div></article>
       <article class="trace-card"><canvas id="plethCanvas" aria-label="Pulse oximetry waveform"></canvas></article>
       <article class="vital-card bp-card"><div class="vital-label">NIBP</div><div class="bp-value"><span id="sbpValue">---</span>/<span id="dbpValue">---</span></div><div class="map-value">MAP <span id="mapValue">---</span></div></article>
-      <article class="vital-card co2-card"><div class="vital-label">RESPIRATORY RATE</div><div class="vital-value rr-primary"><span id="rrValue">--</span><small>/min</small></div><div class="etco2-secondary">ETCO₂ <span id="etco2Value">--</span> kPa</div></article>
+      <article class="vital-card co2-card"><div class="vital-label">RESPIRATORY RATE</div><div class="vital-value rr-primary"><span id="rrValue">--</span><small>/min</small></div><div class="etco2-secondary">ETCO₂ <span id="etco2Value">--</span> kPa</div><div class="temp-secondary">TEMP <span id="tempValue">--</span> <span id="tempUnitLabel">°C</span></div></article>
     </section>
     <footer class="monitor-controls">
       <div id="presetButtons" class="preset-buttons" aria-label="Simulation states"></div>
